@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Inspección de Vehículos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      margin: 0;
+      background: #f9f9f9;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    form {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+    }
+
+    input, select, textarea, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:disabled {
+      background-color: #aaa;
+    }
+
+    .success, .error {
+      text-align: center;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+
+    .success {
+      color: green;
+    }
+
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <h1>Formulario de Inspección de Vehículo</h1>
+
+  <form id="inspectionForm">
+    <label>Tipo de vehículo:
+      <select name="vehicleType" required>
+        <option value="">Selecciona</option>
+        <option value="Auto">Auto</option>
+        <option value="Camioneta">Camioneta</option>
+        <option value="Camión">Camión</option>
+      </select>
+    </label>
+
+    <label>Número de placas:
+      <input type="text" name="plateNumber" required pattern="[A-Z0-9-]{5,10}" title="Formato válido requerido">
+    </label>
+
+    <label>Fecha:
+      <input type="date" name="date" required>
+    </label>
+
+    <label>Kilometraje:
+      <input type="number" name="mileage" min="0" required>
+    </label>
+
+    <label>Próximo cambio de aceite (km):
+      <input type="number" name="nextOilChange" min="0">
+    </label>
+
+    <label>Nombre del conductor:
+      <input type="text" name="driverName" required>
+    </label>
+
+    <label>Puesto del conductor:
+      <input type="text" name="driverPosition">
+    </label>
+
+    <label>Hora de inspección:
+      <input type="time" name="inspectionTime" required>
+    </label>
+
+    <label>Luces bajas:
+      <select name="lowBeam" required>
+        <option value="">Selecciona</option>
+        <option value="Sí">Sí</option>
+        <option value="No">No</option>
+      </select>
+    </label>
+
+    <label>Notas sobre luces bajas:
+      <textarea name="lowBeamNotes" rows="3"></textarea>
+    </label>
+
+    <button type="submit" id="submitBtn">Enviar</button>
+    <div class="success" id="successMsg" style="display: none;">Formulario enviado correctamente ✅</div>
+    <div class="error" id="errorMsg" style="display: none;">Hubo un error. Intenta de nuevo ❌</div>
+  </form>
+
+  <script>
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbz4mGOqY8dQrQuzmXTPCUbykytBlCYgUBqiCxXvThD30otNEQfhvUwCtHlkoRLWooeA/exec';
+    const form = document.getElementById('inspectionForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const successMsg = document.getElementById('successMsg');
+    const errorMsg = document.getElementById('errorMsg');
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      successMsg.style.display = 'none';
+      errorMsg.style.display = 'none';
+
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      submitBtn.disabled = true;
+
+      const formData = new FormData(form);
+      const data = {};
+      formData.forEach((value, key) => data[key] = value);
+
+      fetch(scriptURL, {
+        method: 'POST',
+        body: JSON.stringify(data),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => response.json())
+      .then(result => {
+        successMsg.style.display = 'block';
+        form.reset();
+      })
+      .catch(error => {
+        errorMsg.style.display = 'block';
+        console.error('Error:', error);
+      })
+      .finally(() => {
+        submitBtn.disabled = false;
+      });
+    });
+  </script>
+</body>
+</html>
